@@ -2,9 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { BaseAccount } from "account-abstraction/core/BaseAccount.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "account-abstraction/core/BaseAccount.sol";
 
-contract Account is BaseAccount {
+contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
     address public owner;
