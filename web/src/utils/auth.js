@@ -1,4 +1,5 @@
 import { LitAuthClient } from "@lit-protocol/lit-auth-client"; 
+import { LitAccessControlConditionResource } from "@lit-protocol/auth-helpers";
 
 // Set up LitAuthClient
 const litAuthClient = new LitAuthClient({
@@ -39,7 +40,34 @@ const handleRedirect = async () => {
       
     // Get auth method object that has the OAuth token from redirect callback
     const authMethod = await provider.authenticate();
-    console.log("authMethod: ", authMethod);
+    console.log("authMethod: ", authMethod)
+
+    let pkps = await provider.fetchPKPsThroughRelayer(authMethod);
+    if (pkps.length === 0) {
+        await provider.mintPKPThroughRelayer(authMethod);
+        pkps = await provider.fetchPKPsThroughRelayer(authMethod);
+    }
+    const pkp = pkps[0]; // always use the defauly PKP
+
+    console.log("pkp: ", pkp);
+
+    // LitAbility.LitAbility.pkp signing
+    // Create the Lit Resource using wildcard for all resources
+    const litResource = new LitAccessControlConditionResource('*');    
+    const sessionSigs = await provider.getSessionSigs({
+        authMethod: authMethod,
+        sessionSigsParams: {
+          chain: 'ethereum',
+          resourceAbilityRequests: [
+            {
+                resource: litResource,
+                ability:'pkp-signing' // LitAbility.PKPSigning
+            }
+          ],
+        },
+    });
+
+    console.log("sessionSigs: ", sessionSigs);
 
 };
 
