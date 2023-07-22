@@ -1,5 +1,6 @@
 import { LitAuthClient } from "@lit-protocol/lit-auth-client"; 
 import { LitAccessControlConditionResource } from "@lit-protocol/auth-helpers";
+import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 
 // Set up LitAuthClient
 const litAuthClient = new LitAuthClient({
@@ -29,6 +30,35 @@ const socialLogin = async () => {
     // const authData = await provider.authenticate(authData);
     // console.log("result: ", result);
 }
+
+const litActionCode = `
+const go = async () => {  
+  // this requests a signature share from the Lit Node
+  // the signature share will be automatically returned in the HTTP response from the node
+  // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
+  const sigShare = await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+};
+
+go();
+`;
+
+const runLitAction = async (publicKey, sessionSigs) => {
+  const litNodeClient = new LitJsSdk.LitNodeClientNodeJs({ litNetwork: "serrano" });
+  await litNodeClient.connect();
+  const signatures = await litNodeClient.executeJs({
+    code: litActionCode,
+    sessionSigs,
+    // all jsParams can be used anywhere in your litActionCode
+    jsParams: {
+      // this is the string "Hello World" for testing
+      toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+      publicKey:
+        publicKey,
+      sigName: "sig1",
+    },
+  });
+  console.log("signatures: ", signatures);
+};
 
 const handleRedirect = async () => {
     localStorage.removeItem('redirectToApp'); // Remove the key after handling the redirect
@@ -68,6 +98,8 @@ const handleRedirect = async () => {
     });
 
     console.log("sessionSigs: ", sessionSigs);
+
+    await runLitAction(pkp.publicKey, sessionSigs);
 
 };
 
