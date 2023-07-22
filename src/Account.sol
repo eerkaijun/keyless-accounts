@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "account-abstraction/core/BaseAccount.sol";
 
-contract Account is BaseAccount, UUPSUpgradeable, Initializable {
+contract SmartAccount is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
     address public owner;
 
-    IEntryPoint private immutable _entryPoint;
+    IEntryPoint private _entryPoint;
 
     event AccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
 
@@ -28,11 +28,6 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
-
-    constructor(IEntryPoint anEntryPoint) {
-        _entryPoint = anEntryPoint;
-        _disableInitializers();
-    }
 
     function _onlyOwner() internal view {
         //directly from EOA owner, or through the account itself (which gets redirected through execute())
@@ -63,11 +58,8 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
       * the implementation by calling `upgradeTo()`
      */
-    function initialize(address anOwner) public virtual initializer {
-        _initialize(anOwner);
-    }
-
-    function _initialize(address anOwner) internal virtual {
+    function initialize(IEntryPoint anEntryPoint, address anOwner) public virtual initializer {
+        _entryPoint = anEntryPoint;
         owner = anOwner;
         emit AccountInitialized(_entryPoint, owner);
     }

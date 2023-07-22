@@ -12,10 +12,12 @@ import "./Account.sol";
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract AccountFactory {
-    Account public immutable accountImplementation;
+    SmartAccount public immutable accountImplementation;
+    IEntryPoint public immutable entryPoint;
 
     constructor(IEntryPoint _entryPoint) {
-        accountImplementation = new Account(_entryPoint);
+        entryPoint = _entryPoint;
+        accountImplementation = new SmartAccount();
     }
 
     /**
@@ -24,15 +26,15 @@ contract AccountFactory {
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
-    function createAccount(address owner,uint256 salt) public returns (Account ret) {
+    function createAccount(address owner,uint256 salt) public returns (SmartAccount ret) {
         address addr = getAddress(owner, salt);
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
-            return Account(payable(addr));
+            return SmartAccount(payable(addr));
         }
-        ret = Account(payable(new ERC1967Proxy{salt : bytes32(salt)}(
+        ret = SmartAccount(payable(new ERC1967Proxy{salt : bytes32(salt)}(
                 address(accountImplementation),
-                abi.encodeCall(Account.initialize, (owner))
+                abi.encodeCall(SmartAccount.initialize, (entryPoint, owner))
             )));
     }
 
@@ -44,7 +46,7 @@ contract AccountFactory {
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
                     address(accountImplementation),
-                    abi.encodeCall(Account.initialize, (owner))
+                    abi.encodeCall(SmartAccount.initialize, (entryPoint, owner))
                 )
             )));
     }
