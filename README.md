@@ -7,13 +7,13 @@ The Lit protocol PKP is used to create a smart contract account, and we have a p
 ### Getting Started
 
 To compile Solidity contracts and run the test, execute the following:
-1. forge install
-2. forge test
+1. `forge install`
+2. `forge test`
 
 To run the web app, where users are able to generate an in-browser account using social logins, execute the following:
-1. cd web
-2. npm install
-3. npm start
+1. `cd web`
+2. `npm install`
+3. `npm start`
 
 ### Architecture
 
