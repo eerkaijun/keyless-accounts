@@ -1,14 +1,18 @@
 import logo from './logo.svg';
 import './App.css';
-
-function socialLogin() {
-  alert('Social Login!');
-}
+import { socialLogin, handleRedirect } from './utils/auth';
+import { useEffect } from 'react';
 
 function App() {
   const handleButtonClick = () => {
     socialLogin();
   };
+
+  useEffect(() => {
+    if (localStorage.getItem('redirectToApp') === 'true') {
+      handleRedirect();
+    }
+  }, []);
 
   return (
     <div className="App">
