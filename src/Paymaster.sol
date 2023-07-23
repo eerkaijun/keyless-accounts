@@ -25,6 +25,7 @@ contract Paymaster is BasePaymaster {
     function _validatePaymasterUserOp(UserOperation calldata userOp, bytes32 /*userOpHash*/, uint256 requiredPreFund)
     internal override returns (bytes memory context, uint256 validationData) {
         // TODO: check if user should be subsidized gas
+        // currently just subsidize for all users
     }
 
     /**
@@ -35,7 +36,8 @@ contract Paymaster is BasePaymaster {
      * and the transaction should succeed there.
      */
     function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
-        // TODO: redeem gas fee? might not be needed
+        // redeem gas fee
+        // not needed in our current use case where dApps fully sponsor
     }
     
 }

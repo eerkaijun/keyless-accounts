@@ -18,3 +18,17 @@ To run the web app, where users are able to generate an in-browser account using
 ### Architecture
 
 ![Architecture](./img/keyless-accounts.png)
+
+### Deployed Contracts
+
+We deploy the contracts on Mantle and Celo testnet
+
+Mantle:
+1. MockContract: `0xb396232592CF383c62e8A5895B892d482500f3F0`
+2. AccountFactory: `0x5Bc073B57038086BF294DC9594D9857247506D7C`
+3. Paymaster: `0x9FA4cfAB777274aedBD7a5C39b733c3E4534844F`
+
+Celo:
+1. MockContract: `0x89DfBDa1cdeBd97c1930da34fcC0fcc2F5B4e075`
+2. AccountFactory: `0xfe5CD4EB9748C62B6B3edd36FA6c033c95D2f685`
+3. Paymaster: `0x04D06f2b651B6732154b6b7d508d15f45dceea9F`
