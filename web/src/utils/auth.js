@@ -1,6 +1,9 @@
 import { LitAuthClient } from "@lit-protocol/lit-auth-client"; 
 import { LitAccessControlConditionResource } from "@lit-protocol/auth-helpers";
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
+import { ethers } from 'ethers';
+import { abi as accountFactoryAbi } from '../abis/AccountFactory';
+import { abi as mockContractAbi } from '../abis/MockContract';
 
 // Set up LitAuthClient
 const litAuthClient = new LitAuthClient({
@@ -57,7 +60,7 @@ const runLitAction = async (publicKey, sessionSigs) => {
       sigName: "sig1",
     },
   });
-  console.log("signatures: ", signatures);
+  return signatures;
 };
 
 const handleRedirect = async () => {
@@ -96,10 +99,29 @@ const handleRedirect = async () => {
           ],
         },
     });
-
     console.log("sessionSigs: ", sessionSigs);
 
-    await runLitAction(pkp.publicKey, sessionSigs);
+    const signatures = await runLitAction(pkp.publicKey, sessionSigs);
+    console.log("signatures: ", signatures);
+
+    const providerOnMantle = new ethers.providers.JsonRpcProvider("https://rpc.testnet.mantle.xyz");
+    const accountFactoryAddress = "0x5Bc073B57038086BF294DC9594D9857247506D7C";
+    const accountFactory = new ethers.Contract(accountFactoryAddress, accountFactoryAbi, providerOnMantle);
+    const mockContractAddress = "0xb396232592CF383c62e8A5895B892d482500f3F0";
+    const mockContract = new ethers.Contract(mockContractAddress, mockContractAbi, providerOnMantle);
+
+    // this would usually be at a server
+    const wallet = new ethers.Wallet("", providerOnMantle); // provide private key
+    await accountFactory.connect(wallet).createAccount(pkp.ethAddress, 0);
+    const accountAddress = await accountFactory.getAddress(pkp.ethAddress, 0);
+
+    console.log("accountAddress: ", accountAddress);
+
+    const randomTokenId = Math.floor(Math.random() * (999 - 0 + 1));
+    await mockContract.connect(wallet).mint(accountAddress, randomTokenId);
+
+    const balance = await mockContract.balanceOf(accountAddress);
+    console.log("balance: ", balance.toString());
 
 };
 
