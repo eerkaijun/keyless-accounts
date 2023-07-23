@@ -123,6 +123,7 @@ const handleRedirect = async () => {
     const balance = await mockContract.balanceOf(accountAddress);
     console.log("balance: ", balance.toString());
 
+    return balance.toString();
 };
 
 export { socialLogin, handleRedirect }; 
